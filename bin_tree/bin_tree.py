@@ -1,6 +1,6 @@
 #  Copyright (c) 2021  SBA - MIT License
 
-from collections import Sized, Iterable, MutableMapping, Mapping
+from collections import MutableMapping, Mapping, MutableSet
 
 
 class Node:
@@ -10,9 +10,8 @@ class Node:
     This class contains what is required to add and remove nodes, as
     well as iterate a subtree, but does not attempt to balance the tree
     """
-    def __init__(self, key, value=None):
+    def __init__(self, key):
         self.key = key
-        self.value = value
         self.left = None
         self.right = None
 
@@ -87,69 +86,51 @@ class Node:
                 yield k
 
 
-class BinTree(MutableMapping):
+class ValueNode(Node):
+    def __init__(self, key, value=None):
+        super(ValueNode, self).__init__(key)
+        self.value = value
+
+
+class BinTree:
     """
-    Simple MutableMapping implemented as a Binary Tree.
+    Simple implementation of a Binary Tree.
 
     Keys have to be comparable.This class does not attempt to balance
     its tree. Subclasses are expected to use Node subclasses to provide
     balancing algorithms.
     """
 
-    def __init__(self, items=(), node_class=Node):
+    def __init__(self, node_class=Node):
         self.nodeClass = node_class
         self.root = None
         self._len = 0
-        if isinstance(items, Mapping):
-            for k, v in items.items():
-                self.insert(k, v)
-        for it in items:
-            if isinstance(it, (bytes, bytearray, str)):
-                it = [it]
-            if (isinstance(it, Sized) and isinstance(it, Iterable)
-                    and 1 <= len(it) <= 2):
-                self.insert(*it)
-            else:
-                # noinspection PyTypeChecker
-                self.insert(it)
 
-    def insert(self, key, value=None):
-        """
-        Inserts a new element in the tree
-
-        :param key: new key
-        :type key: a comparable type
-        :param value: new value
-        :return: None
-        :rtype: NoneType
-        """
-        self.root, _ = self._insert(self.root, key, value)
-
-    def _insert(self, node: Node, key, value):
+    def _insert(self, node: Node, *args):
         """
         Protected method to insert an element into a subtree.
 
         :param node: root of the subtree
         :type node: node_class
-        :param key: new key
-        :type key: a comparable type
-        :param value: new value
+        :param *args: new key or new key value
         :return: the new root of the subtree and an integer helping
             subclasses to re-balance the tree: 0 if subtree should be
             seen as not changed, 1 if an addition has to be considered
         :rtype: Tuple[Node, int]
         """
+        key = args[0]
         if node is None:
             self._len += 1
-            node, delta = self.nodeClass(key, value), 1
+            node, delta = self.nodeClass(*args), 1
         elif key == node.key:
-            node.value = value
+            if issubclass(self.nodeClass, ValueNode):
+                self.value = args[1]
             delta = 0
         elif key < node.key:
-            node.left, delta = self._insert(node.left, key, value)
+            node.left, delta = self._insert(node.left, *args)
             node, delta = node.adjust(node.left, delta)
         else:
-            node.right, delta = self._insert(node.right, key, value)
+            node.right, delta = self._insert(node.right, *args)
             node, delta = node.adjust(node.right, delta)
         return node, delta
 
@@ -178,13 +159,15 @@ class BinTree(MutableMapping):
             elif node.side() == -1:
                 other = node.left.max_child()
                 node.key = other.key
-                node.value = other.value
+                if issubclass(self.nodeClass, ValueNode):
+                    node.value = other.value
                 node.left, delta = self._remove(node.left, other.key)
                 node, delta = node.adjust(node.left, delta)
             else:
                 other = node.right.min_child()
                 node.key = other.key
-                node.value = other.value
+                if issubclass(self.nodeClass, ValueNode):
+                    node.value = other.value
                 node.right, delta = self._remove(node.right, other.key)
                 node, delta = node.adjust(node.right, delta)
         elif key < node.key:
@@ -197,27 +180,18 @@ class BinTree(MutableMapping):
 
     def _find(self, node, key):
         if node is None:
-            raise KeyError()
+            return None
         if node.key == key:
-            return node.value
+            return node
         return self._find(node.left if key < node.key else node.right,
                           key)
 
     def __len__(self):
         return self._len
 
-    def __delitem__(self, key) -> None:
-        self.root, _ = self._remove(self.root, key)
-
-    def __getitem__(self, key):
-        return self._find(self.root, key)
-
     def __iter__(self):
         return (it.key for it in iter(self.root)
                 ) if self.root else iter(tuple())
-
-    def __setitem__(self, k, v) -> None:
-        self.insert(k, v)
 
     def _height(self, node):
         if node is None:
@@ -251,3 +225,80 @@ class BinTree(MutableMapping):
             msgs[l][i] = str(k)
         for lst in msgs:
             print('\t'.join(lst))
+
+
+class TreeDict(BinTree, MutableMapping):
+    """
+    Simple MutableMapping implemented as a Binary Tree.
+
+    Keys have to be comparable.This class does not attempt to balance
+    its tree. Subclasses are expected to use Node subclasses to provide
+    balancing algorithms.
+    """
+
+    def __init__(self, items=(), node_class=ValueNode, **kwargs):
+        if not issubclass(node_class, ValueNode):
+            raise TypeError('node_class must be a subclass of ValueNode')
+        super().__init__(node_class)
+        if isinstance(items, Mapping):
+            for k, v in items.items():
+                self.root, _ = self._insert(self.root, k, v)
+        for it in items:
+            self.root, _ = self._insert(self.root, *it)
+        for k, v in kwargs:
+            self.root, _ = self._insert(self.root, k, v)
+
+#    def insert(self, key, value=None):
+#        """
+#        Inserts a new element in the tree
+#
+#        :param key: new key
+#        :type key: a comparable type
+#        :param value: new value
+#        :return: None
+#        :rtype: NoneType
+#        """
+#        self.root, _ = self._insert(self.root, key, value)
+#
+    def __delitem__(self, key) -> None:
+        self.root, _ = self._remove(self.root, key)
+
+    def __getitem__(self, key):
+        node = self._find(self.root, key)
+        if node is None:
+            raise KeyError
+        return node.value
+
+    def __setitem__(self, k, v) -> None:
+        self._insert(self.root, k, v)
+
+
+class TreeSet(BinTree, MutableSet):
+    """
+    Simple MutableSet implemented as a binary tree.
+
+    Keys have to be comparable.This class does not attempt to balance
+    its tree. Subclasses are expected to use Node subclasses to provide
+    balancing algorithms.
+    """
+    def __init__(self, items=tuple(), node_class=Node):
+        super(TreeSet, self).__init__(node_class)
+        for it in items:
+            self.root, _ = self._insert(self.root, it)
+
+    def add(self, key):
+        """
+        Inserts a new element in the tree
+
+        :param key: new key
+        :type key: a comparable type
+        :return: None
+        :rtype: NoneType
+        """
+        self.root, _ = self._insert(self.root, key)
+
+    def discard(self, key) -> None:
+        self.root, _ = self._remove(self.root, key)
+
+    def __contains__(self, x) -> bool:
+        pass

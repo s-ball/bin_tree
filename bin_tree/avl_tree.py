@@ -1,11 +1,12 @@
 #  Copyright (c) 2021  SBA - MIT License
 
-from .bin_tree import Node, BinTree
+from .bin_tree import Node, ValueNode
+from . import bin_tree
 
 
 class AVLNode(Node):
-    def __init__(self, key, value=None):
-        super().__init__(key, value)
+    def __init__(self, key):
+        super().__init__(key)
         self.weight = 0
 
     def rotate_left(self):
@@ -52,6 +53,15 @@ class AVLNode(Node):
             return self, delta
 
 
-class AVLTree(BinTree):
+class AVLValueNode(ValueNode, AVLNode):
+    pass
+
+
+class TreeSet(bin_tree.TreeSet):
     def __init__(self, items=tuple(), node_class=AVLNode):
         super().__init__(items, node_class)
+
+
+class TreeDict(bin_tree.TreeDict):
+    def __init__(self, items=(), node_class=AVLValueNode, **kwargs):
+        super(TreeDict, self).__init__(items, node_class, **kwargs)

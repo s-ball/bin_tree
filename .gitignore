@@ -29,3 +29,6 @@ version.py
 
 # ignore venv directory
 venv/
+
+# ignore .eggs
+.eggs/

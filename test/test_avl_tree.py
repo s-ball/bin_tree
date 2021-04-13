@@ -1,7 +1,7 @@
 #  Copyright (c) 2021  SBA - MIT License
 
 import unittest
-from bin_tree.avl_tree import AVLNode, AVLTree
+from bin_tree.avl_tree import AVLNode, TreeSet, TreeDict
 import itertools
 
 
@@ -114,7 +114,7 @@ class RotateRight(unittest.TestCase):
 class Inserts(unittest.TestCase):
     def test_3(self):
         for i in itertools.permutations(range(1, 4)):
-            tree = AVLTree(i)
+            tree = TreeSet(i)
             self.assertEqual(2, tree.root.key)
             self.assertEqual(0, tree.root.weight)
             self.assertEqual(2, tree.height())
@@ -122,7 +122,7 @@ class Inserts(unittest.TestCase):
 
     def test_7(self):
         for i in itertools.permutations(range(1, 8)):
-            tree = AVLTree(i)
+            tree = TreeSet(i)
             if 3 == tree.height():
                 self.assertEqual(4, tree.root.key)
                 self.assertEqual(0, tree.root.weight)
@@ -131,44 +131,44 @@ class Inserts(unittest.TestCase):
 
 class Delete(unittest.TestCase):
     def test_low_left(self):
-        tree = AVLTree((4, 3, 5, 1, 2))
-        del tree[1]
+        tree = TreeSet((4, 3, 5, 1, 2))
+        tree.discard(1)
         self.assertEqual(-1, tree.root.weight)
         self.assertEqual(2, tree.root.left.key)
         self.assertEqual(1, tree.root.left.weight)
 
     def test_low_right(self):
-        tree = AVLTree((4, 3, 5, 1, 2))
-        del tree[3]
+        tree = TreeSet((4, 3, 5, 1, 2))
+        tree.discard(3)
         self.assertEqual(-1, tree.root.weight)
         self.assertEqual(2, tree.root.left.key)
         self.assertEqual(-1, tree.root.left.weight)
 
     def test_top_left(self):
-        tree = AVLTree((3, 4, 2, 1))
-        del tree[3]
+        tree = TreeSet((3, 4, 2, 1))
+        tree.discard(3)
         self.assertEqual(2, tree.root.key)
         self.assertEqual(0, tree.root.weight)
         self.assertEqual(2, tree.height())
 
     def test_top_right(self):
-        tree = AVLTree((2, 1, 4, 3))
-        del tree[2]
+        tree = TreeSet((2, 1, 4, 3))
+        tree.discard(2)
         self.assertEqual(3, tree.root.key)
         self.assertEqual(0, tree.root.weight)
         self.assertEqual(2, tree.height())
 
     def test_rotate_left(self):
-        tree = AVLTree((3, 2, 5, 1, 4, 6, 7))
+        tree = TreeSet((3, 2, 5, 1, 4, 6, 7))
         self.assertEqual(1, tree.root.weight)
-        del tree[1]
+        tree.discard(1)
         self.assertEqual(5, tree.root.key)
         self.assertEqual(0, tree.root.weight)
 
     def test_rotate_right(self):
-        tree = AVLTree((5, 3, 6, 2, 4, 7, 1))
+        tree = TreeSet((5, 3, 6, 2, 4, 7, 1))
         self.assertEqual(-1, tree.root.weight)
-        del tree[6]
+        tree.discard(6)
         self.assertEqual(3, tree.root.key)
         self.assertEqual(0, tree.root.weight)
 
