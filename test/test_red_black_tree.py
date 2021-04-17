@@ -1,5 +1,5 @@
 import unittest
-from bin_tree.red_black_tree import TreeSet, Color
+from bin_tree.red_black_tree import TreeSet, TreeDict, Color
 
 
 class Insert(unittest.TestCase):
@@ -115,7 +115,6 @@ class Delete(unittest.TestCase):
         self.assertEqual(3, tree.black_height())
         self.assertEqual(4, tree.height())
         tree.discard(9)
-        tree.dump()
         self.assertEqual(3, tree.black_height())
         self.assertEqual(4, tree.height())
         self.assertEqual(4, tree.root.key)
@@ -127,6 +126,29 @@ class Delete(unittest.TestCase):
         self.assertEqual(Color.BLACK, tree.root.right.right.color)
         self.assertEqual(7, tree.root.right.right.left.key)
         self.assertEqual(Color.RED, tree.root.right.right.left.color)
+
+
+class TestDictTree(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tree = TreeDict((i, 2 * i) for i in range(1, 8))
+
+    def test_init(self):
+        self.assertEqual(3, self.tree.black_height())
+        self.assertEqual(3, self.tree.height())
+        self.assertEqual(4, self.tree.root.key)
+
+    def test_get(self):
+        self.assertEqual(12, self.tree[6])
+
+    def test_set(self):
+        self.tree[6] = 18
+        self.assertEqual(18, self.tree[6])
+
+    def test_del(self):
+        del self.tree[4]
+        self.assertEqual(2, self.tree.black_height())
+        self.assertEqual(3, self.tree.height())
+        self.assertEqual(3, self.tree.root.key)
 
 
 if __name__ == '__main__':

@@ -124,7 +124,7 @@ class BinTree:
             node, delta = self.nodeClass(*args), 1
         elif key == node.key:
             if issubclass(self.nodeClass, ValueNode):
-                self.value = args[1]
+                node.value = args[1]
             delta = 0
         elif key < node.key:
             node.left, delta = self._insert(node.left, *args)

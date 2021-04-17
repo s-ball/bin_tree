@@ -104,14 +104,10 @@ class RBNode(Node):
         return self.right if child is self.left else self.left
 
 
-class TreeSet(bin_tree.TreeSet):
-    def __init__(self, items=tuple(), node_class=RBNode):
-        super(TreeSet, self).__init__(items, node_class)
-        self.root.color = Color.BLACK
-
-    def _insert(self, node: Node, key):
+class RBTree(bin_tree.BinTree):
+    def _insert(self, node: Node, *args):
         root = node is self.root
-        node, delta = super(TreeSet, self)._insert(node, key)
+        node, delta = super(RBTree, self)._insert(node, *args)
         if root:
             node.color = Color.BLACK
         return node, delta
@@ -124,3 +120,17 @@ class TreeSet(bin_tree.TreeSet):
                 h += 1
             node = node.left
         return h
+
+
+class TreeSet(RBTree, bin_tree.TreeSet):
+    def __init__(self, items=tuple(), node_class=RBNode):
+        super(TreeSet, self).__init__(items, node_class)
+
+
+class RBValueNode(bin_tree.ValueNode, RBNode):
+    pass
+
+
+class TreeDict(RBTree, bin_tree.TreeDict):
+    def __init__(self, items=(), node_class=RBValueNode, **kwargs):
+        super(TreeDict, self).__init__(items, node_class, **kwargs)
