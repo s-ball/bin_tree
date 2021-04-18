@@ -80,7 +80,7 @@ class Delete(unittest.TestCase):
     def test_black_one_red_child(self):
         tree = TreeSet((4, 2, 6, 1, 3, 5, 8, 7))
         self.assertEqual(2, tree.black_height())
-        tree.discard(7)
+        tree.discard(8)
         self.assertEqual(Color.BLACK, tree.root.right.right.color)
 
     def test_red_parent(self):
@@ -126,6 +126,19 @@ class Delete(unittest.TestCase):
         self.assertEqual(Color.BLACK, tree.root.right.right.color)
         self.assertEqual(7, tree.root.right.right.left.key)
         self.assertEqual(Color.RED, tree.root.right.right.left.color)
+
+    def test_red_sibling(self):
+        tree = TreeSet((1, 2, 3, 4, 6, 9, 10, 5, 7, 8))
+        self.assertEqual(3, tree.black_height())
+        tree.discard(10)
+        self.assertEqual(6, tree.root.right.key)
+        self.assertEqual(Color.BLACK, tree.root.right.color)
+        self.assertEqual(8, tree.root.right.right.key)
+        self.assertEqual(Color.RED, tree.root.right.right.color)
+        self.assertEqual(7, tree.root.right.right.left.key)
+        self.assertEqual(Color.BLACK, tree.root.right.right.left.color)
+        self.assertEqual(9, tree.root.right.right.right.key)
+        self.assertEqual(Color.BLACK, tree.root.right.right.right.color)
 
 
 class TestDictTree(unittest.TestCase):

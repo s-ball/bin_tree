@@ -248,18 +248,6 @@ class TreeDict(BinTree, MutableMapping):
         for k, v in kwargs:
             self.root, _ = self._insert(self.root, k, v)
 
-#    def insert(self, key, value=None):
-#        """
-#        Inserts a new element in the tree
-#
-#        :param key: new key
-#        :type key: a comparable type
-#        :param value: new value
-#        :return: None
-#        :rtype: NoneType
-#        """
-#        self.root, _ = self._insert(self.root, key, value)
-#
     def __delitem__(self, key) -> None:
         self.root, _ = self._remove(self.root, key)
 
@@ -301,4 +289,4 @@ class TreeSet(BinTree, MutableSet):
         self.root, _ = self._remove(self.root, key)
 
     def __contains__(self, x) -> bool:
-        pass
+        return self._find(self.root, x) is not None

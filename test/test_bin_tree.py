@@ -49,6 +49,12 @@ class TestBTree(unittest.TestCase):
         self.assertEqual(2, self.tree.root.key)
         self.assertEqual(list(range(1, 8)), list(self.tree))
 
+    def test_in(self):
+        self.assertTrue(5 in self.tree)
+
+    def test_not_in(self):
+        self.assertFalse(9 in self.tree)
+
 
 class TestDictTree(unittest.TestCase):
     def setUp(self) -> None:
@@ -96,6 +102,12 @@ class TestDictTree(unittest.TestCase):
         self.assertEqual(4, self.tree.height())
         self.assertEqual(2, self.tree.root.key)
         self.assertEqual(list(range(1, 8)), list(self.tree))
+
+    def test_in(self):
+        self.assertTrue(5 in self.tree)
+
+    def test_not_in(self):
+        self.assertFalse(9 in self.tree)
 
 
 if __name__ == '__main__':
