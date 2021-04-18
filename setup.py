@@ -11,7 +11,7 @@ NAME = "bin_tree"
 BASE = "0.0.0"
 try:
     BASE = get_distribution(NAME).parsed_version.base_version
-except ResolutionError:
+except (ResolutionError, OSError):
     # Try to read from version.py file
     try:
         import ast
@@ -33,33 +33,6 @@ with open("README.md") as fd:
     long_description += "".join(fd)
 
 setup(
-    name=NAME,
-    description="Rename image files according to exif tags",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages(exclude=["tests"]),
-    setup_requires=["setuptools_scm"],
-    use_scm_version={"write_to": os.path.join(NAME, 'version.py')},
-    author="SBA",
-    author_email="s-ball@laposte.net",
-    url="https://github.com/s-ball/bin_tree",
-    license="MIT License",
-    project_urls={
-        "Changelog":
-            "https://github.com/s-ball/bin_tree/blob/master/CHANGES.txt"
-    },
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Topic :: Multimedia :: Graphics",
-    ],
-    python_requires=">=3",
 )
