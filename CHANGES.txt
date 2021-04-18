@@ -5,3 +5,5 @@
     a Red-Black binary Tree.
     Coverage > 90%
     Uses pyproject.toml
+
+0.2.1: Cosmetic changes
