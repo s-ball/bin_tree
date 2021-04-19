@@ -22,8 +22,23 @@ class Node:
     """
     def __init__(self, key: CT):
         self.key = key
-        self.left = None
-        self.right = None
+        self.child = [cast('Node', None), cast('Node', None)]
+
+    @property
+    def left(self) -> 'Node':
+        return self.child[0]
+
+    @left.setter
+    def left(self, x: 'Node'):
+        self.child[0] = x
+
+    @property
+    def right(self) -> 'Node':
+        return self.child[1]
+
+    @right.setter
+    def right(self, x: 'Node'):
+        self.child[1] = x
 
     # noinspection PyUnusedLocal
     def adjust(self, child: 'Node', delta: int):
@@ -51,19 +66,23 @@ class Node:
         """
         return -1
 
-    def max_child(self) -> 'Node':
-        """Search the rightmost child in the subtree"""
+    def last_child(self, side: int) -> 'Node':
         child = self
-        while child.right is not None:
-            child = child.right
+        while child.child[side] is not None:
+            child = child.child[side]
         return child
 
-    def min_child(self) -> 'Node':
-        """Search the leftmost child in the subtree"""
-        child = self
-        while child.left is not None:
-            child = child.left
-        return child
+    def _rotate(self, side: int) -> 'Node':
+        """
+        Rotate a subtree to the left is side is 0 else to the right.
+
+        :return: the new root of the subtree (the previous right child)
+        :rtype: Node
+        """
+        node = self.child[1 - side]
+        self.child[1 - side] = node.child[side]
+        node.child[side] = self
+        return node
 
     def rotate_left(self) -> 'Node':
         """
@@ -72,10 +91,7 @@ class Node:
         :return: the new root of the subtree (the previous right child)
         :rtype: Node
         """
-        node = self.right
-        self.right = node.left
-        node.left = self
-        return node
+        return self._rotate(0)
 
     def rotate_right(self) -> 'Node':
         """
@@ -84,18 +100,15 @@ class Node:
         :return: the new root of the subtree (the previous left child)
         :rtype: Node
         """
-        node = self.left
-        self.left = node.right
-        node.right = self
-        return node
+        return self._rotate(1)
 
     def __iter__(self):
-        if self.left:
-            for k in iter(self.left):
+        if self.child[0]:
+            for k in iter(self.child[0]):
                 yield k
         yield self
-        if self.right:
-            for k in iter(self.right):
+        if self.child[1]:
+            for k in iter(self.child[1]):
                 yield k
 
 
@@ -139,12 +152,10 @@ class BinTree:
             if issubclass(self.nodeClass, ValueNode):
                 node.value = args[1]
             delta = 0
-        elif key < node.key:
-            node.left, delta = self._insert(node.left, *args)
-            node, delta = node.adjust(node.left, delta)
         else:
-            node.right, delta = self._insert(node.right, *args)
-            node, delta = node.adjust(node.right, delta)
+            side = 0 if key < node.key else 1
+            node.child[side], delta = self._insert(node.child[side], *args)
+            node, delta = node.adjust(node.child[side], delta)
         return node, delta
 
     def _remove(self, node: Node, key: CT) -> Tuple[Node, int]:
@@ -163,32 +174,24 @@ class BinTree:
         if node is None:
             raise KeyError()
         if key == node.key:
-            if node.left is None:
+            if node.child[0] is None:
                 self._len -= 1
-                return node.right, -1
-            elif node.right is None:
+                return node.child[1], -1
+            elif node.child[1] is None:
                 self._len -= 1
-                return node.left, -1
-            elif node.side() == -1:
-                other = node.left.max_child()
-                node.key = other.key
-                if issubclass(self.nodeClass, ValueNode):
-                    node.value = other.value
-                node.left, delta = self._remove(node.left, other.key)
-                node, delta = node.adjust(node.left, delta)
+                return node.child[0], -1
             else:
-                other = node.right.min_child()
+                side = int(node.side() == 1)
+                other = node.child[side].last_child(1 - side)
                 node.key = other.key
                 if issubclass(self.nodeClass, ValueNode):
-                    node.value = other.value
-                node.right, delta = self._remove(node.right, other.key)
-                node, delta = node.adjust(node.right, delta)
-        elif key < node.key:
-            node.left, delta = self._remove(node.left, key)
-            node, delta = node.adjust(node.left, delta)
+                    node.value = cast('ValueNode', other).value
+                node.child[side], delta = self._remove(node.child[side], other.key)
+                node, delta = node.adjust(node.child[side], delta)
         else:
-            node.right, delta = self._remove(node.right, key)
-            node, delta = node.adjust(node.right, delta)
+            side = int(key > node.key)
+            node.child[side], delta = self._remove(node.child[side], key)
+            node, delta = node.adjust(node.child[side], delta)
         return node, delta
 
     def _find(self, node, key: CT) -> Optional['Node']:
@@ -196,8 +199,7 @@ class BinTree:
             return None
         if node.key == key:
             return node
-        return self._find(node.left if key < node.key else node.right,
-                          key)
+        return self._find(node.child[key > node.key], key)
 
     def __len__(self) -> int:
         return self._len
@@ -209,7 +211,7 @@ class BinTree:
     def _height(self, node) -> int:
         if node is None:
             return 0
-        return 1 + max(self._height(node.left), self._height(node.right))
+        return 1 + max(self._height(node.child[i]) for i in range(2))
 
     def height(self) -> int:
         """
@@ -227,12 +229,12 @@ class BinTree:
         msgs = [['' for _ in range(len(self))] for _j in range(self.height())]
 
         def g(node, level):
-            if node.left:
-                for kk, ll in g(node.left, level + 1):
+            if node.child[0]:
+                for kk, ll in g(node.child[0], level + 1):
                     yield kk, ll
             yield node.key, level
-            if node.right:
-                for kk, ll in g(node.right, level + 1):
+            if node.child[1]:
+                for kk, ll in g(node.child[1], level + 1):
                     yield kk, ll
         for i, (k, l) in enumerate(g(self.root, 0)):
             msgs[l][i] = str(k)
