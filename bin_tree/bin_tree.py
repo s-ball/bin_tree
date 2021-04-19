@@ -2,10 +2,10 @@
 
 from collections import MutableMapping, Mapping, MutableSet
 from abc import ABCMeta, abstractmethod
-from typing import Any, TypeVar, Tuple, Optional, cast
+from typing import Any, TypeVar, Tuple, Optional, cast, Protocol
 
 
-class Comparable(metaclass=ABCMeta):
+class Comparable(Protocol, metaclass=ABCMeta):
     @abstractmethod
     def __lt__(self, other: Any) -> bool: ...
 
