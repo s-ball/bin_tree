@@ -258,9 +258,10 @@ class TreeDict(BinTree, MutableMapping):
         if isinstance(items, Mapping):
             for k, v in items.items():
                 self.root, _ = self._insert(self.root, k, v)
-        for it in items:
-            self.root, _ = self._insert(self.root, *it)
-        for k, v in kwargs:
+        else:
+            for it in items:
+                self.root, _ = self._insert(self.root, *it)
+        for k, v in kwargs.items():
             self.root, _ = self._insert(self.root, k, v)
 
     def __delitem__(self, key: CT) -> None:

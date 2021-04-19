@@ -109,6 +109,28 @@ class TestDictTree(unittest.TestCase):
     def test_not_in(self):
         self.assertFalse(9 in self.tree)
 
+    def test_missing(self):
+        with self.assertRaises(KeyError):
+            del self.tree[9]
+
+
+class DictTreeInit(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tree = bin_tree.TreeDict(((chr(ord('a') + i), i+1)
+                                       for i in (1, 0, 2)))
+
+    def test_kwargs(self):
+        tree2 = bin_tree.TreeDict(a=1, b=2, c=3)
+        self.assertEqual(self.tree, tree2)
+
+    def test_mapping(self):
+        d = dict(self.tree)
+        self.assertEqual(self.tree, bin_tree.TreeDict(d))
+
+    def test_node_type(self):
+        with self.assertRaises(TypeError):
+            tree2 = bin_tree.TreeDict(a=1, b=2, c=3, node_class=bin_tree.Node)
+
 
 if __name__ == '__main__':
     unittest.main()
