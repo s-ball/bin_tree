@@ -16,6 +16,7 @@ class RotateLeft(unittest.TestCase):
         self.assertEqual(2, new.key)
         self.assertEqual(0, new.weight)
         self.assertEqual(0, node.weight)
+        self.assertTrue(new.is_valid())
 
     def test_normal(self):
         node = AVLNode(2)
@@ -29,6 +30,7 @@ class RotateLeft(unittest.TestCase):
         self.assertEqual(node, new.left)
         self.assertEqual(-1, new.weight)
         self.assertEqual(0, node.weight)
+        self.assertTrue(new.is_valid())
 
     def test_right(self):
         node = AVLNode(2)
@@ -43,6 +45,7 @@ class RotateLeft(unittest.TestCase):
         self.assertEqual(None, node.right)
         self.assertEqual(-1, node.weight)
         self.assertEqual(-1, new.weight)
+        self.assertTrue(new.is_valid())
 
     def test_left(self):
         node = AVLNode(2)
@@ -56,6 +59,7 @@ class RotateLeft(unittest.TestCase):
         self.assertEqual(node, new.left)
         self.assertEqual(0, node.weight)
         self.assertEqual(-2, new.weight)
+        self.assertFalse(new.is_valid())
 
 
 class RotateRight(unittest.TestCase):
@@ -69,6 +73,7 @@ class RotateRight(unittest.TestCase):
         self.assertEqual(2, new.key)
         self.assertEqual(0, new.weight)
         self.assertEqual(0, node.weight)
+        self.assertTrue(new.is_valid())
 
     def test_normal(self):
         node = AVLNode(4)
@@ -82,6 +87,7 @@ class RotateRight(unittest.TestCase):
         self.assertEqual(node, new.right)
         self.assertEqual(1, new.weight)
         self.assertEqual(0, node.weight)
+        self.assertTrue(new.is_valid())
 
     def test_right(self):
         node = AVLNode(3)
@@ -96,6 +102,7 @@ class RotateRight(unittest.TestCase):
         self.assertEqual(None, new.left)
         self.assertEqual(0, node.weight)
         self.assertEqual(2, new.weight)
+        self.assertFalse(new.is_valid())
 
     def test_left(self):
         node = AVLNode(3)
@@ -109,6 +116,7 @@ class RotateRight(unittest.TestCase):
         self.assertEqual(node, new.right)
         self.assertEqual(1, node.weight)
         self.assertEqual(1, new.weight)
+        self.assertTrue(new.is_valid())
 
 
 class Inserts(unittest.TestCase):
@@ -119,6 +127,7 @@ class Inserts(unittest.TestCase):
             self.assertEqual(0, tree.root.weight)
             self.assertEqual(2, tree.height())
             self.assertEqual((1, 2, 3), tuple(tree))
+            self.assertTrue(tree.is_valid())
 
     def test_7(self):
         for i in itertools.permutations(range(1, 8)):
@@ -127,6 +136,7 @@ class Inserts(unittest.TestCase):
                 self.assertEqual(4, tree.root.key)
                 self.assertEqual(0, tree.root.weight)
                 self.assertEqual((1, 2, 3, 4, 5, 6, 7), tuple(tree))
+            self.assertTrue(tree.is_valid())
 
 
 class Delete(unittest.TestCase):
@@ -136,6 +146,7 @@ class Delete(unittest.TestCase):
         self.assertEqual(-1, tree.root.weight)
         self.assertEqual(2, tree.root.left.key)
         self.assertEqual(1, tree.root.left.weight)
+        self.assertTrue(tree.is_valid())
 
     def test_low_right(self):
         tree = TreeSet((4, 3, 5, 1, 2))
@@ -143,6 +154,7 @@ class Delete(unittest.TestCase):
         self.assertEqual(-1, tree.root.weight)
         self.assertEqual(2, tree.root.left.key)
         self.assertEqual(-1, tree.root.left.weight)
+        self.assertTrue(tree.is_valid())
 
     def test_top_left(self):
         tree = TreeSet((3, 4, 2, 1))
@@ -150,6 +162,7 @@ class Delete(unittest.TestCase):
         self.assertEqual(2, tree.root.key)
         self.assertEqual(0, tree.root.weight)
         self.assertEqual(2, tree.height())
+        self.assertTrue(tree.is_valid())
 
     def test_top_right(self):
         tree = TreeSet((2, 1, 4, 3))
@@ -157,6 +170,7 @@ class Delete(unittest.TestCase):
         self.assertEqual(3, tree.root.key)
         self.assertEqual(0, tree.root.weight)
         self.assertEqual(2, tree.height())
+        self.assertTrue(tree.is_valid())
 
     def test_rotate_left(self):
         tree = TreeSet((3, 2, 5, 1, 4, 6, 7))
@@ -164,6 +178,7 @@ class Delete(unittest.TestCase):
         tree.discard(1)
         self.assertEqual(5, tree.root.key)
         self.assertEqual(0, tree.root.weight)
+        self.assertTrue(tree.is_valid())
 
     def test_rotate_right(self):
         tree = TreeSet((5, 3, 6, 2, 4, 7, 1))
@@ -171,6 +186,7 @@ class Delete(unittest.TestCase):
         tree.discard(6)
         self.assertEqual(3, tree.root.key)
         self.assertEqual(0, tree.root.weight)
+        self.assertTrue(tree.is_valid())
 
 
 if __name__ == '__main__':

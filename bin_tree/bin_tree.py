@@ -111,6 +111,14 @@ class Node:
             for k in iter(self.child[1]):
                 yield k
 
+    def is_valid(self) -> bool:
+        """Debugging method to test whether a node is valid.
+
+        This implementation only returns True and is expected to be
+        overridden in subclasses for more relevant values
+        """
+        return self is self
+
 
 class ValueNode(Node):
     def __init__(self, key, value=None):
@@ -240,6 +248,13 @@ class BinTree:
             msgs[l][i] = str(k)
         for lst in msgs:
             print('\t'.join(lst))
+
+    def is_valid(self) -> bool:
+        if self._len != len(tuple(self)):
+            return False
+        if self.root and not self.root.is_valid():
+            return False
+        return True
 
 
 class TreeDict(BinTree, MutableMapping):

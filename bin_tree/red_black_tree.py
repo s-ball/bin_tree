@@ -104,6 +104,17 @@ class RBNode(Node):
     def _other_child(self, child) -> 'RBNode':
         return self.right if child is self.left else self.left
 
+    def is_valid(self) -> bool:
+        def black_height(node):
+            child_height = black_height(node.child[0]) if node.child[0] else 0
+            return int(node.color is Color.BLACK) + child_height
+        
+        if self.color == Color.RED:
+            for _ in self.child:
+                if _ and _.color == Color.RED:
+                    return False
+        return black_height(self.child[0]) == black_height(self.child[1])
+
 
 class RBTree(bin_tree.BinTree):
     def _insert(self, node: RBNode, *args) -> Tuple['RBNode', int]:
@@ -121,6 +132,12 @@ class RBTree(bin_tree.BinTree):
                 h += 1
             node = node.left
         return h
+    
+    def is_valid(self) -> bool:
+        if self.root and (not self.root.is_valid()
+                          or Color.RED == self.root.color):
+            return False
+        return super(RBTree, self).is_valid()
 
 
 class TreeSet(RBTree, bin_tree.TreeSet):

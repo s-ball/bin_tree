@@ -53,6 +53,19 @@ class AVLNode(Node):
         else:
             return self, delta
 
+    def is_valid(self) -> bool:
+        def height(node: bin_tree.Node) -> int:
+            if node is None:
+                return 0
+            return 1 + max(height(node.child[_]) for _ in range(2))
+
+        for i in range(2):
+            if self.child[i] and not self.child[i].is_valid():
+                return False
+        if not -1 <= self.weight <= 1:
+            return False
+        return self.weight == height(self.child[1]) - height(self.child[0])
+
 
 class AVLValueNode(ValueNode, AVLNode):
     pass

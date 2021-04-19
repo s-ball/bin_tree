@@ -60,6 +60,9 @@ class TestDictTree(unittest.TestCase):
     def setUp(self) -> None:
         self.tree = bin_tree.TreeDict((i, None) for i in (4, 2, 1, 3, 6, 5, 7))
 
+    def test_valid(self):
+        self.assertTrue(self.tree.is_valid())
+
     def test_len(self):
         self.assertEqual(7, len(self.tree))
         self.assertTrue(3, self.tree.height())
@@ -122,6 +125,7 @@ class DictTreeInit(unittest.TestCase):
     def test_kwargs(self):
         tree2 = bin_tree.TreeDict(a=1, b=2, c=3)
         self.assertEqual(self.tree, tree2)
+        self.assertTrue(tree2.is_valid())
 
     def test_mapping(self):
         d = dict(self.tree)
