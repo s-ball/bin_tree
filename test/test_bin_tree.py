@@ -129,7 +129,7 @@ class DictTreeInit(unittest.TestCase):
 
     def test_node_type(self):
         with self.assertRaises(TypeError):
-            tree2 = bin_tree.TreeDict(a=1, b=2, c=3, node_class=bin_tree.Node)
+            bin_tree.TreeDict(a=1, b=2, c=3, node_class=bin_tree.Node)
 
 
 if __name__ == '__main__':

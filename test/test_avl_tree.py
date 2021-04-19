@@ -1,7 +1,7 @@
 #  Copyright (c) 2021  SBA - MIT License
 
 import unittest
-from bin_tree.avl_tree import AVLNode, TreeSet, TreeDict
+from bin_tree.avl_tree import AVLNode, TreeSet  # , TreeDict
 import itertools
 
 
