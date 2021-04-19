@@ -3,6 +3,7 @@
 from .bin_tree import Node  # , ValueNode
 from . import bin_tree
 from enum import Enum
+from typing import Optional, Tuple, cast
 
 
 class Color(Enum):
@@ -15,7 +16,7 @@ class RBNode(Node):
         super().__init__(key)
         self.color = Color.RED
 
-    def adjust(self, child, delta):
+    def adjust(self, child: Optional['RBNode'], delta) -> Tuple['RBNode', int]:
         if delta == 1:  # RED addition
             return self, 2 if self.color == Color.RED else 0
         if delta == 2:  # RED violation on child
@@ -55,12 +56,12 @@ class RBNode(Node):
                 if child is self.left:
                     other = self.rotate_left()
                     other.color = Color.BLACK
-                    other.left = self._paint_red(self.right)
+                    other.left = self._paint_red(cast('RBNode', self.right))
                     return other, 0
                 else:
                     other = self.rotate_right()
                     other.color = Color.BLACK
-                    other.right = self._paint_red(self.left)
+                    other.right = self._paint_red(cast('RBNode', self.left))
                     return other, 0
             if ((other.right and other.right.color == Color.RED)
                     or (other.left and other.left.color == Color.RED)):
@@ -75,7 +76,7 @@ class RBNode(Node):
         return self, 2 if (self.color == Color.RED
                            and child.color == Color.RED) else 0
 
-    def _paint_red(self, child):
+    def _paint_red(self, child: 'RBNode') -> 'RBNode':
         child.color = Color.RED
         if child.left and child.left.color == Color.RED:
             if child is self.right:
@@ -97,22 +98,22 @@ class RBNode(Node):
             node = self
         return node
 
-    def side(self):
+    def side(self) -> int:
         return 1 if self.right and self.right.color == Color.RED else -1
 
-    def _other_child(self, child):
+    def _other_child(self, child) -> 'RBNode':
         return self.right if child is self.left else self.left
 
 
 class RBTree(bin_tree.BinTree):
-    def _insert(self, node: Node, *args):
+    def _insert(self, node: RBNode, *args) -> Tuple['RBNode', int]:
         root = node is self.root
         node, delta = super(RBTree, self)._insert(node, *args)
         if root:
             node.color = Color.BLACK
-        return node, delta
+        return cast('RBNode', node), delta
 
-    def black_height(self):
+    def black_height(self) -> int:
         h = 0
         node = self.root
         while node is not None:

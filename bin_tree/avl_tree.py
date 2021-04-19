@@ -2,6 +2,7 @@
 
 from .bin_tree import Node, ValueNode
 from . import bin_tree
+from typing import cast, Tuple
 
 
 class AVLNode(Node):
@@ -9,7 +10,7 @@ class AVLNode(Node):
         super().__init__(key)
         self.weight = 0
 
-    def rotate_left(self):
+    def rotate_left(self) -> 'AVLNode':
         node = self.right
         self.weight -= 1
         if node.weight > 0:
@@ -17,9 +18,9 @@ class AVLNode(Node):
         node.weight -= 1
         if self.weight < 0:
             node.weight += self.weight
-        return super().rotate_left()
+        return cast('AVLNode', super().rotate_left())
 
-    def rotate_right(self):
+    def rotate_right(self) -> 'AVLNode':
         node = self.left
         self.weight += 1
         if node.weight < 0:
@@ -27,12 +28,12 @@ class AVLNode(Node):
         node.weight += 1
         if self.weight > 0:
             node.weight += self.weight
-        return super().rotate_right()
+        return cast('AVLNode', super().rotate_right())
 
-    def side(self):
+    def side(self) -> int:
         return 1 if self.weight >= 0 else -1
 
-    def adjust(self, child, delta):
+    def adjust(self, child, delta) -> Tuple['AVLNode', int]:
         if child == self.left:
             self.weight -= delta
         else:

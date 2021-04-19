@@ -1,6 +1,16 @@
 #  Copyright (c) 2021  SBA - MIT License
 
 from collections import MutableMapping, Mapping, MutableSet
+from abc import ABCMeta, abstractmethod
+from typing import Any, TypeVar, Tuple, Optional, cast
+
+
+class Comparable(metaclass=ABCMeta):
+    @abstractmethod
+    def __lt__(self, other: Any) -> bool: ...
+
+
+CT = TypeVar('CT', bound=Comparable)
 
 
 class Node:
@@ -10,13 +20,13 @@ class Node:
     This class contains what is required to add and remove nodes, as
     well as iterate a subtree, but does not attempt to balance the tree
     """
-    def __init__(self, key):
+    def __init__(self, key: CT):
         self.key = key
         self.left = None
         self.right = None
 
     # noinspection PyUnusedLocal
-    def adjust(self, child, delta):
+    def adjust(self, child: 'Node', delta: int):
         """
         Balance the tree after an insertion or a removal.
 
@@ -25,7 +35,7 @@ class Node:
 
         :param child: the child that was updated
         :type child: Node or a subclass of Node
-        :param delta: +1, 0 or -1, used by subclasses
+        :param delta: used by subclasses
         :type delta: integer
         :return: returns the new root of the subtree (self in that
             implementation) and the new delta
@@ -34,25 +44,28 @@ class Node:
         return self, delta
 
     # noinspection PyMethodMayBeStatic
-    def side(self):
-        """Define the preferred side for searching next node to remove."""
+    def side(self) -> int:
+        """Define the preferred side for searching next node to remove.
+
+        Return -1 for left or 1 for right
+        """
         return -1
 
-    def max_child(self):
+    def max_child(self) -> 'Node':
         """Search the rightmost child in the subtree"""
         child = self
         while child.right is not None:
             child = child.right
         return child
 
-    def min_child(self):
+    def min_child(self) -> 'Node':
         """Search the leftmost child in the subtree"""
         child = self
         while child.left is not None:
             child = child.left
         return child
 
-    def rotate_left(self):
+    def rotate_left(self) -> 'Node':
         """
         Rotate a subtree to the left.
 
@@ -64,7 +77,7 @@ class Node:
         node.left = self
         return node
 
-    def rotate_right(self):
+    def rotate_right(self) -> 'Node':
         """
         Rotate a subtree to the right.
 
@@ -106,7 +119,7 @@ class BinTree:
         self.root = None
         self._len = 0
 
-    def _insert(self, node: Node, *args):
+    def _insert(self, node: Node, *args) -> Tuple[Node, int]:
         """
         Protected method to insert an element into a subtree.
 
@@ -134,7 +147,7 @@ class BinTree:
             node, delta = node.adjust(node.right, delta)
         return node, delta
 
-    def _remove(self, node: Node, key):
+    def _remove(self, node: Node, key: CT) -> Tuple[Node, int]:
         """
         Protected method to remove an element from a subtree.
 
@@ -178,7 +191,7 @@ class BinTree:
             node, delta = node.adjust(node.right, delta)
         return node, delta
 
-    def _find(self, node, key):
+    def _find(self, node, key: CT) -> Optional['Node']:
         if node is None:
             return None
         if node.key == key:
@@ -186,19 +199,19 @@ class BinTree:
         return self._find(node.left if key < node.key else node.right,
                           key)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self._len
 
     def __iter__(self):
         return (it.key for it in iter(self.root)
                 ) if self.root else iter(tuple())
 
-    def _height(self, node):
+    def _height(self, node) -> int:
         if node is None:
             return 0
         return 1 + max(self._height(node.left), self._height(node.right))
 
-    def height(self):
+    def height(self) -> int:
         """
         Returns the height of the tree.
 
@@ -207,7 +220,7 @@ class BinTree:
         """
         return self._height(self.root)
 
-    def dump(self):
+    def dump(self) -> None:
         """
         Debugging method that tries to dump a tree.
         """
@@ -248,16 +261,16 @@ class TreeDict(BinTree, MutableMapping):
         for k, v in kwargs:
             self.root, _ = self._insert(self.root, k, v)
 
-    def __delitem__(self, key) -> None:
+    def __delitem__(self, key: CT) -> None:
         self.root, _ = self._remove(self.root, key)
 
-    def __getitem__(self, key):
-        node = self._find(self.root, key)
+    def __getitem__(self, key: CT):
+        node = cast(ValueNode, self._find(self.root, key))
         if node is None:
             raise KeyError
         return node.value
 
-    def __setitem__(self, k, v) -> None:
+    def __setitem__(self, k: CT, v) -> None:
         self._insert(self.root, k, v)
 
 
@@ -274,7 +287,7 @@ class TreeSet(BinTree, MutableSet):
         for it in items:
             self.root, _ = self._insert(self.root, it)
 
-    def add(self, key):
+    def add(self, key: CT) -> None:
         """
         Inserts a new element in the tree
 
@@ -285,8 +298,8 @@ class TreeSet(BinTree, MutableSet):
         """
         self.root, _ = self._insert(self.root, key)
 
-    def discard(self, key) -> None:
+    def discard(self, key: CT) -> None:
         self.root, _ = self._remove(self.root, key)
 
-    def __contains__(self, x) -> bool:
+    def __contains__(self, x: CT) -> bool:
         return self._find(self.root, x) is not None
