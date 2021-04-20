@@ -7,3 +7,8 @@
     Uses pyproject.toml
 
 0.2.1: Cosmetic changes
+
+0.3.0: Add Travis-CI integration
+    A bunch of fixes...
+    Limit code duplication by using a 2-list for children
+    Test usage on Python >= 3.5
