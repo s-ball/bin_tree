@@ -26,16 +26,11 @@ class RBNode(Node):
                 self.left.color = self.right.color = Color.BLACK
                 return self, 0
             else:
-                if child is self.left:
-                    if not child.left or child.left.color == Color.BLACK:
-                        self.left = child = child.rotate_left()
-                    self.rotate_right()
-                    child.left.color = Color.BLACK
-                else:
-                    if not child.right or child.right.color == Color.BLACK:
-                        self.right = child = child.rotate_right()
-                    self.rotate_left()
-                    child.right.color = Color.BLACK
+                side = child is self.right
+                if not child.child[side] or child.child[side].color == Color.BLACK:
+                    self.child[side] = child = child._rotate(side)
+                self._rotate(1 - side)
+                child.child[side].color = Color.BLACK
                 return child, 0
         other = self._other_child(child)
         if delta == -1:  # child removal
@@ -45,7 +40,7 @@ class RBNode(Node):
                 return self, 0
             if other is None or (other.color == Color.RED
                                  and other.left is None):
-                # removal of a red orphan: no violation
+                # removal of a red with no child: no violation
                 return self, 0
         if delta < 0:  # one level black violation
             if self.color == Color.RED:  # found a black ancestor
@@ -53,22 +48,16 @@ class RBNode(Node):
                 node = self._paint_red(other)
                 return node, 0
             if other.color == Color.RED:  # sibling is red
-                if child is self.left:
-                    other = self.rotate_left()
-                    other.color = Color.BLACK
-                    other.left = self._paint_red(cast('RBNode', self.right))
-                    return other, 0
-                else:
-                    other = self.rotate_right()
-                    other.color = Color.BLACK
-                    other.right = self._paint_red(cast('RBNode', self.left))
-                    return other, 0
-            if ((other.right and other.right.color == Color.RED)
-                    or (other.left and other.left.color == Color.RED)):
+                side = int(child is self.right)
+                other = self._rotate(side)
+                other.color = Color.BLACK
+                other.child[side] = self._paint_red(cast(
+                    'RBNode', self.child[1 - side]))
+                return other, 0
+            if any(_ and _.color == Color.RED for _ in other.child):
                 # sibling is black with at least a red child
                 other = self._paint_red(other)
                 other.color = Color.BLACK
-                other.left.color = other.right.color = Color.BLACK
                 return other, 0
             # sibling is black with 2 black children
             other.color = Color.RED
@@ -78,31 +67,20 @@ class RBNode(Node):
 
     def _paint_red(self, child: 'RBNode') -> 'RBNode':
         child.color = Color.RED
-        if child.left and child.left.color == Color.RED:
-            if child is self.right:
-                self.right = child.rotate_right()
-                node = self.rotate_left()
-                node.right.color = Color.BLACK
+        side = int(child is self.right)
+        if child.child[side] is None or child.child[side].color == Color.BLACK:
+            if child.child[1 - side] and child.child[1 - side].color == Color.RED:
+                self.child[side] = child = child._rotate(side)
             else:
-                node = self.rotate_right()
-                node.left.color = Color.BLACK
-        elif child.right and child.right.color == Color.RED:
-            if child is self.left:
-                self.left = child.rotate_left()
-                node = self.rotate_right()
-                node.left.color = Color.BLACK
-            else:
-                node = self.rotate_left()
-                node.right.color = Color.BLACK
-        else:
-            node = self
-        return node
+                return self
+        child.child[side].color = Color.BLACK
+        return self._rotate(1 - side)
 
     def side(self) -> int:
         return 1 if self.right and self.right.color == Color.RED else -1
 
     def _other_child(self, child) -> 'RBNode':
-        return self.right if child is self.left else self.left
+        return self.child[child is self.left]
 
     def is_valid(self) -> bool:
         def black_height(node):
