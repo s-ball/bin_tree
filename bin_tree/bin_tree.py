@@ -2,7 +2,11 @@
 
 from collections import MutableMapping, Mapping, MutableSet
 from abc import ABCMeta, abstractmethod
-from typing import Any, TypeVar, Tuple, Optional, cast, Protocol
+from typing import Any, TypeVar, Tuple, Optional, cast
+try:
+    from typing import Protocol
+except ImportError:
+    Protocol = object
 
 
 class Comparable(Protocol, metaclass=ABCMeta):
