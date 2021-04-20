@@ -3,6 +3,7 @@
 from collections import MutableMapping, Mapping, MutableSet
 from abc import ABCMeta, abstractmethod
 from typing import Any, TypeVar, Tuple, Optional, cast
+# Python<3.8 has no support for Protocol: hack to avoid the error
 try:
     from typing import Protocol
 except ImportError:
