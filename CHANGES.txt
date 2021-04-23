@@ -12,3 +12,6 @@
     A bunch of fixes...
     Limit code duplication by using a 2-list for children
     Test usage on Python >= 3.5
+
+0.4.0: Use bulk insert at tree initialization
+    Fix validation errors on red black trees of sizes 0 or 1

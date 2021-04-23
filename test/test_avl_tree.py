@@ -141,7 +141,9 @@ class Inserts(unittest.TestCase):
 
 class Delete(unittest.TestCase):
     def test_low_left(self):
-        tree = TreeSet((4, 3, 5, 1, 2))
+        tree = TreeSet()
+        for _ in (4, 3, 5, 1, 2):
+            tree.add(_)
         tree.discard(1)
         self.assertEqual(-1, tree.root.weight)
         self.assertEqual(2, tree.root.left.key)
@@ -173,7 +175,9 @@ class Delete(unittest.TestCase):
         self.assertTrue(tree.is_valid())
 
     def test_rotate_left(self):
-        tree = TreeSet((3, 2, 5, 1, 4, 6, 7))
+        tree = TreeSet()
+        for _ in (3, 2, 5, 1, 4, 6, 7):
+            tree.add(_)
         self.assertEqual(1, tree.root.weight)
         tree.discard(1)
         self.assertEqual(5, tree.root.key)
@@ -181,7 +185,9 @@ class Delete(unittest.TestCase):
         self.assertTrue(tree.is_valid())
 
     def test_rotate_right(self):
-        tree = TreeSet((5, 3, 6, 2, 4, 7, 1))
+        tree = TreeSet()
+        for _ in (5, 3, 6, 2, 4, 7, 1):
+            tree.add(_)
         self.assertEqual(-1, tree.root.weight)
         tree.discard(6)
         self.assertEqual(3, tree.root.key)

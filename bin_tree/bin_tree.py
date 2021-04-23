@@ -124,9 +124,16 @@ class Node:
         """
         return self is self
 
+    # noinspection PyMethodMayBeStatic
+    def fix_init(self, left: int, right: int) -> int:
+        return 1 + max(left, right)
+
 
 class ValueNode(Node):
     def __init__(self, key, value=None):
+        if value is None and isinstance(key, tuple) and len(key) == 2:
+            value = key[1]
+            key = key[0]
         super(ValueNode, self).__init__(key)
         self.value = value
 
@@ -261,6 +268,27 @@ class BinTree:
             return False
         return True
 
+    def _load(self, items):
+        if isinstance(items, Mapping):
+            items = items.items()
+        items = sorted(items)
+        self.root = self._build(items, 0)[0]
+        self._len = len(items)
+
+    def _build(self, items, hint) -> Tuple[Optional['Node'], int]:
+        nb = len(items)
+        if nb == 0:
+            return None, 0
+        elif nb == 1:
+            return self.nodeClass(items[0]), 1
+        else:
+            split = nb // 2
+            node = self.nodeClass(items[split])
+            left = self._build(items[:split], hint - 1)
+            right = self._build(items[split + 1:], hint - 1)
+            node.child = [left[0], right[0]]
+            return node, node.fix_init(left[1], right[1])
+
 
 class TreeDict(BinTree, MutableMapping):
     """
@@ -276,11 +304,8 @@ class TreeDict(BinTree, MutableMapping):
             raise TypeError('node_class must be a subclass of ValueNode')
         super().__init__(node_class)
         if isinstance(items, Mapping):
-            for k, v in items.items():
-                self.root, _ = self._insert(self.root, k, v)
-        else:
-            for it in items:
-                self.root, _ = self._insert(self.root, *it)
+            items = items.items()
+        self._load(items)
         for k, v in kwargs.items():
             self.root, _ = self._insert(self.root, k, v)
 
@@ -294,7 +319,7 @@ class TreeDict(BinTree, MutableMapping):
         return node.value
 
     def __setitem__(self, k: CT, v) -> None:
-        self._insert(self.root, k, v)
+        self.root = self._insert(self.root, k, v)[0]
 
 
 class TreeSet(BinTree, MutableSet):
@@ -307,8 +332,7 @@ class TreeSet(BinTree, MutableSet):
     """
     def __init__(self, items=tuple(), node_class=Node):
         super(TreeSet, self).__init__(node_class)
-        for it in items:
-            self.root, _ = self._insert(self.root, it)
+        self._load(items)
 
     def add(self, key: CT) -> None:
         """

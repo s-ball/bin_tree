@@ -84,7 +84,9 @@ class RBNode(Node):
 
     def is_valid(self) -> bool:
         def black_height(node):
-            child_height = black_height(node.child[0]) if node.child[0] else 0
+            if node is None:
+                return 0
+            child_height = black_height(node.child[0])
             return int(node.color is Color.BLACK) + child_height
         
         if self.color == Color.RED:
@@ -116,6 +118,16 @@ class RBTree(bin_tree.BinTree):
                           or Color.RED == self.root.color):
             return False
         return super(RBTree, self).is_valid()
+
+    def _build(self, items, hint) -> Tuple[Optional['Node'], int]:
+        if hint == 0:
+            hint = int.bit_length(len(items))
+            if len(items) == 1:
+                hint = 2
+        node, cr = super()._build(items, hint)
+        if hint != 1 and node is not None:
+            node.color = Color.BLACK
+        return node, cr
 
 
 class TreeSet(RBTree, bin_tree.TreeSet):

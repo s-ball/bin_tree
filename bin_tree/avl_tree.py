@@ -66,6 +66,10 @@ class AVLNode(Node):
             return False
         return self.weight == height(self.child[1]) - height(self.child[0])
 
+    def fix_init(self, left: int, right: int) -> int:
+        self.weight = right - left
+        return super().fix_init(left, right)
+
 
 class AVLValueNode(ValueNode, AVLNode):
     pass
